@@ -1,0 +1,62 @@
+[
+  {
+    "model_name": "codellama:latest",
+    "metrics": {
+      "correctness": 0.413,
+      "relevance": 0.603,
+      "precision_at_k": 0.367,
+      "recall_at_k": 0.35,
+      "mrr": 0.383,
+      "hallucination_rate": 32.38,
+      "code_pass_rate": 0.96,
+      "avg_latency_ms": 2917.62,
+      "prompt_tokens": 10094,
+      "completion_tokens": 2294
+    },
+    "hardware_stats": {
+      "cpu_usage_pct": 45.5,
+      "ram_used_mb": 14360.66,
+      "ram_delta_mb": -18.16
+    }
+  },
+  {
+    "model_name": "starcoder2:latest",
+    "metrics": {
+      "correctness": 0.415,
+      "relevance": 0.605,
+      "precision_at_k": 0.367,
+      "recall_at_k": 0.35,
+      "mrr": 0.383,
+      "hallucination_rate": 32.38,
+      "code_pass_rate": 0.96,
+      "avg_latency_ms": 2863.79,
+      "prompt_tokens": 10094,
+      "completion_tokens": 2294
+    },
+    "hardware_stats": {
+      "cpu_usage_pct": 43.9,
+      "ram_used_mb": 15293.73,
+      "ram_delta_mb": 933.07
+    }
+  },
+  {
+    "model_name": "phi3:latest",
+    "metrics": {
+      "correctness": 0.412,
+      "relevance": 0.602,
+      "precision_at_k": 0.367,
+      "recall_at_k": 0.35,
+      "mrr": 0.383,
+      "hallucination_rate": 32.38,
+      "code_pass_rate": 0.88,
+      "avg_latency_ms": 3014.66,
+      "prompt_tokens": 10094,
+      "completion_tokens": 2294
+    },
+    "hardware_stats": {
+      "cpu_usage_pct": 37.6,
+      "ram_used_mb": 14261.42,
+      "ram_delta_mb": -1032.32
+    }
+  }
+]

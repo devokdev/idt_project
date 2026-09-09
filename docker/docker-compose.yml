@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # Ollama LLM Runtime Service
+  ollama:
+    image: ollama/ollama:latest
+    container_name: mentor_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    restart: unless-stopped
+    networks:
+      - mentor_net
+
+  # AI Project Mentor - FastAPI Backend & Web UI
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    container_name: mentor_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=production
+      - HOST=0.0.0.0
+      - PORT=8000
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - DEFAULT_MODEL=phi3:mini
+    volumes:
+      - ../knowledge_base/vectordb:/app/knowledge_base/vectordb
+      - ../logs:/app/logs
+      - ../evaluation/outputs:/app/evaluation/outputs
+    depends_on:
+      - ollama
+    restart: unless-stopped
+    networks:
+      - mentor_net
+
+networks:
+  mentor_net:
+    driver: bridge
+
+volumes:
+  ollama_models:
+    driver: local

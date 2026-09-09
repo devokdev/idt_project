@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Project Mentor | Final-Year Student Advisor</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon">🚀</div>
+                <div class="logo-text">
+                    <h2>AI Mentor</h2>
+                    <span class="badge">Final-Year Capstone</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <label for="model-select">Active LLM Model</label>
+                <select id="model-select" class="dropdown">
+                    <option value="auto">⚡ Auto Router (Smart Selection)</option>
+                    <option value="phi3:mini" selected>Phi-3 Mini (Live Neural Model)</option>
+                    <option value="phi3:latest">Phi-3 Latest</option>
+                    <option value="codellama:latest">Code Llama 7B (Architecture & Code)</option>
+                    <option value="starcoder2:latest">StarCoder2 (Syntax & Bugfix)</option>
+                </select>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="toggle-container">
+                    <label class="switch">
+                        <input type="checkbox" id="rag-toggle" checked>
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="toggle-label">Enable RAG Grounding</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Quick Inquiries</h3>
+                <div class="quick-prompts" id="quick-prompts">
+                    <button class="quick-btn" onclick="useQuickPrompt('How is the final-year project evaluation rubric scored?')">📊 Evaluation Rubric</button>
+                    <button class="quick-btn" onclick="useQuickPrompt('What is the recommended tech stack and architecture for my project?')">🏛️ Architecture Stack</button>
+                    <button class="quick-btn" onclick="useQuickPrompt('What are the most common viva defense questions for external examiners?')">🎓 Viva Questions</button>
+                    <button class="quick-btn" onclick="useQuickPrompt('What is the standard Git branching workflow for team projects?')">🌿 Git Workflow</button>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="status-indicator">
+                    <span class="dot online"></span>
+                    <span id="system-status">System Online (ChromaDB Active)</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-main">
+            <header class="chat-header">
+                <div class="header-info">
+                    <h1>AI Project Mentor & Academic Advisor</h1>
+                    <p>Grounding final-year engineering projects with verified rubrics and standards</p>
+                </div>
+                <div class="header-metrics" id="header-metrics">
+                    <span class="metric-chip" id="chip-latency">⏱️ Latency: -- ms</span>
+                    <span class="metric-chip" id="chip-confidence">🎯 Grounding: --</span>
+                </div>
+            </header>
+
+            <div class="chat-messages" id="chat-messages">
+                <div class="message assistant welcome-msg">
+                    <div class="msg-avatar">🤖</div>
+                    <div class="msg-body">
+                        <h3>Welcome to your AI Project Mentor!</h3>
+                        <p>I am your specialized advisor for your final-year engineering project. I can guide you through:</p>
+                        <ul>
+                            <li><strong>System Architecture & Tech Stack Selection</strong> (FastAPI, Vector DBs, Ollama).</li>
+                            <li><strong>Evaluation Rubrics & Milestone Deliverables</strong> (Synopsis, Mid-term, Final Viva).</li>
+                            <li><strong>Implementation Roadmaps & Test-Driven Development</strong>.</li>
+                            <li><strong>Viva Voce Preparation & Examiner Defense Strategies</strong>.</li>
+                        </ul>
+                        <p>Ask any question below or select from the quick prompt chips.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suggestion Autocomplete Bar -->
+            <div class="autocomplete-box" id="autocomplete-box" style="display: none;"></div>
+
+            <!-- Input Container -->
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <textarea id="prompt-input" placeholder="Ask about project architecture, evaluation marks, Git rules, or debugging..." rows="2"></textarea>
+                    <button id="send-btn" class="send-button" onclick="sendMessage()">
+                        <span>Send</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

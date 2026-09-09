@@ -1,0 +1,53 @@
+# Application Configuration
+app:
+  name: "AI Project Mentor for Final-Year Students"
+  version: "1.0.0"
+  environment: "development"
+  host: "0.0.0.0"
+  port: 8000
+  log_level: "INFO"
+
+# Ollama & LLM Configuration
+llm:
+  ollama_base_url: "http://localhost:11434"
+  default_model: "phi3:mini"
+  supported_models:
+    - "phi3:mini"
+    - "phi3:latest"
+    - "codellama:latest"
+    - "starcoder2:latest"
+  timeout_seconds: 180
+  max_retries: 2
+  retry_backoff_factor: 1.5
+  temperature: 0.2
+  top_p: 0.95
+  max_tokens: 1024
+
+# Vector DB & Embeddings Configuration
+rag:
+  embedding_model_name: "all-MiniLM-L6-v2"
+  chroma_db_dir: "knowledge_base/vectordb"
+  collection_name: "project_mentor_kb"
+  code_collection_name: "repository_code_kb"
+  top_k: 4
+  similarity_threshold: 0.10
+  chunk_size: 500
+  chunk_overlap: 80
+
+# Router & Guardrails Configuration
+guardrails:
+  enabled: true
+  min_prompt_length: 3
+  max_prompt_length: 4000
+  blocked_keywords:
+    - "hack into university database"
+    - "steal credentials"
+    - "bypass authentication maliciously"
+    - "confidential exam paper leak"
+  groundedness_threshold: 0.60
+
+# Microservice Ports (if running distributed)
+services:
+  gateway_port: 8000
+  retriever_port: 8001
+  llm_port: 8002
