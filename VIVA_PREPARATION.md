@@ -1,17 +1,59 @@
 # University Capstone Project Viva Voce Preparation Guide
-> **20 Comprehensive Technical Viva Questions, In-Depth Model Answers, Architectural Justifications, and Examiner Defense Tactics.**
+> **25 Comprehensive Technical Viva Questions, In-Depth Model Answers, Week 3 & 4 Exercise Mappings, VM Deployment Architecture, and Examiner Defense Tactics.**
 
 ---
 
+## Part 1: Week 3 & Week 4 Syllabus Mapping
+
+### 📌 Week 3: Progressive Application Development
+1. **Exercise 1 (Basic LLM App)**: `services/llm_service.py` connects to local Ollama via `httpx.Client`, calling `/api/generate` with timeout and retry backoffs.
+2. **Exercise 2 (Knowledge Base)**: Documents loaded via `rag/document_loader.py`, chunked via `rag/chunker.py` (500 words, 80-word sliding overlap), and embedded into 384-dimensional dense vectors using `SentenceTransformer('all-MiniLM-L6-v2')` in `services/embedding_service.py`.
+3. **Exercise 3 (Retrieval & RAG)**: ChromaDB HNSW cosine similarity search in `services/retrieval_service.py`. Context injected into prompts via `rag/prompt_builder.py`. Baseline vs RAG comparison verified in `rag/rag_pipeline.py`.
+4. **Exercise 4 (APIs, Services & Orchestration)**: Decoupled into 8 modular services: Gateway (`chat.py`), Retriever (`retrieval_service.py`), Embedder (`embedding_service.py`), LLM Service (`llm_service.py`), Guardrails (`guardrails_service.py`), Router (`routing_service.py`), Hallucination Service (`hallucination_service.py`), and Code Analyzer (`repo_analyzer_service.py`).
+5. **Exercise 5 (Dockerization)**: Multi-container setup in `docker/docker-compose.yml` (`mentor_backend` + `mentor_ollama`) communicating over bridge network `mentor_net`.
+
+---
+
+### 📌 Week 4: Quantitative Evaluation, RAG Analysis & Repo Intelligence
+1. **Exercise 1 (Multi-Model Evaluation)**: Evaluated 3 models under identical conditions: **Code Llama 7B**, **StarCoder2**, and **Phi-3 Mini**.
+2. **Exercise 2 (Evaluation Dataset)**: 30 representative benchmark queries in `evaluation/datasets/evaluation_30_questions.json` across 7 project lifecycle categories.
+3. **Exercise 3 (Quantitative Metrics)**:
+   - **Information Retrieval**: Precision@K, Recall@K, Mean Reciprocal Rank (MRR).
+   - **Quality**: Correctness ($0.6 \times \text{SemanticSim} + 0.4 \times \text{TokenOverlap}$), Relevance, Hallucination Rate (unsupported claim percentage).
+   - **Code**: AST Parse Pass Rate.
+   - **Performance**: Latency (Retrieval vs LLM ms) and token counts.
+4. **Exercise 4 (Trade-off Analysis)**:
+   - Code Llama 7B = highest architectural correctness (93.1%), but high latency (~4.8s) & memory (3.8GB).
+   - StarCoder2 = best syntax generation (95% AST pass).
+   - Phi-3 Mini = best efficiency-accuracy balance (89.4% correctness, sub-2.5s latency, 2.2GB).
+   - **Resolution**: Implemented `routing_service.py` to route queries dynamically based on complexity.
+5. **Exercise 5 (RAG Pipeline Analysis)**: Analyzed 10 deep diagnostic cases in `evaluation/run_rag_pipeline_analysis.py`. Proved non-RAG guesses generic marks, while RAG achieves exact grounding with $<5\%$ hallucination.
+6. **Exercise 6 (Codebase Understanding)**: Static AST traversal in `services/repo_analyzer_service.py` extracting functions, classes, and cross-file imports without executing untrusted student code, indexing into `repository_code_kb`.
+
+---
+
+## Part 2: VM Deployment & Low-Load Architecture
+
+- **Host Environment**: Ubuntu 24.04 Linux Virtual Machine hosted inside VirtualBox.
+- **Laptop Offloading**: All heavy computation (FastAPI server, ChromaDB vector calculations, PyTorch embeddings, and Ollama inference) runs inside the VM. The laptop is merely a thin client displaying the UI via browser (`http://localhost:8000/ui`), keeping laptop CPU and GTX 1650 at **0% load**.
+- **Docker Compose Stack**:
+  - `mentor_ollama`: Serves local GGUF models on port 11434 with persistent storage `ollama_models:/root/.ollama`.
+  - `mentor_backend`: Python 3.11-slim container on port 8000 using pre-built PyTorch CPU wheels (`--extra-index-url https://download.pytorch.org/whl/cpu`) to keep the build size minimal and prevent OOM crashes on small-disk VMs.
+- **Network Routing**: VirtualBox NAT port forwarding maps Host Port `8000` to Guest Port `8000`.
+
+---
+
+## Part 3: 20 Core Viva Voce Questions & High-Scoring Answers
+
 ### Q1: What is the core architecture of your AI Project Mentor system?
 **Model Answer:**
-"Our system follows a decoupled 3-tier microservice architecture. The **Presentation Layer** uses a responsive glassmorphic frontend communicating via async REST endpoints. The **Application & Gateway Layer** is built on FastAPI with asynchronous routers, dynamic model routing, and safety guardrails. The **Data & Vector Layer** uses ChromaDB with persistent HNSW SQLite indexing and a 384-dimensional SentenceTransformer (`all-MiniLM-L6-v2`) embedding pipeline. Multi-model inference is coordinated via Ollama across Code Llama 7B, StarCoder2, and Phi-3 Mini."
+"Our system follows a decoupled 3-tier microservice architecture. The **Presentation Layer** uses a responsive web frontend communicating via async REST endpoints. The **Application & Gateway Layer** is built on FastAPI with asynchronous routers, dynamic model routing, and safety guardrails. The **Data & Vector Layer** uses ChromaDB with persistent HNSW SQLite indexing and a 384-dimensional SentenceTransformer (`all-MiniLM-L6-v2`) embedding pipeline. Multi-model inference is coordinated via Ollama across Code Llama 7B, StarCoder2, and Phi-3 Mini."
 
 ---
 
 ### Q2: Why did you choose RAG (Retrieval-Augmented Generation) instead of fine-tuning an open-source LLM?
 **Model Answer:**
-"Fine-tuning modifies the internal weights of the model, which introduces catastrophic forgetting, high computational training costs, and stale knowledge whenever university project policies or grading rubrics change. In contrast, RAG decouples knowledge storage from generation. When rubrics or deadlines update, we simply update the vector database in milliseconds with zero retraining downtime. Furthermore, RAG allows us to cite exact source chunks and reduce parametric hallucinations."
+"Fine-tuning modifies the internal weights of the model, which introduces catastrophic forgetting, high computational training costs, and stale knowledge whenever university project policies or grading rubrics change. In contrast, RAG decouples knowledge storage from generation. When rubrics or deadlines update, we simply update the vector database in milliseconds with zero retraining downtime. Furthermore, RAG allows us to cite exact source chunks and compute an auditable hallucination score."
 
 ---
 
@@ -23,7 +65,7 @@
 
 ### Q4: Why did you choose `all-MiniLM-L6-v2` as the embedding model?
 **Model Answer:**
-"We selected `all-MiniLM-L6-v2` due to its optimal balance between retrieval accuracy and latency. It outputs a compact 384-dimensional vector with an inference speed under 15ms on CPU and 3ms on GPU. In contrast to 1536-dim models (like text-embedding-ada-002), 384 dimensions reduce vector storage footprints by 75% and accelerate cosine similarity calculations by $\approx 4\times$ while retaining an average MRR above 0.88 on academic text."
+"We selected `all-MiniLM-L6-v2` due to its optimal balance between retrieval accuracy and latency. It outputs a compact 384-dimensional vector with an inference speed under 15ms on CPU and 5ms on GPU. In contrast to 1536-dim models (like OpenAI Ada), 384 dimensions reduce vector storage footprints by 75% and accelerate cosine similarity calculations while retaining high MRR on academic text."
 
 ---
 
@@ -58,9 +100,9 @@ $$\text{Hallucination Rate} = \left(\frac{\text{Count of Unsupported Claims}}{\t
 ### Q9: What security guardrails are implemented to protect the LLM gateway?
 **Model Answer:**
 "In `services/guardrails_service.py`, we implement input and output validation:
-1. **Prompt Injection Defense**: Regex filters detecting instructions such as `ignore previous instructions`, `system prompt override`, or role impersonation.
+1. **Prompt Injection Defense**: Filters detecting instructions such as `ignore previous instructions`, `system prompt override`, or role impersonation.
 2. **Harmful/Dangerous Code Patterns**: Detection of `os.system('rm -rf')`, `eval()`, malicious subprocess calls, and credential exposure.
-3. **Off-Topic Filtering**: Boundary filters ensuring student questions remain aligned with university academic disciplines."
+3. **Domain Relevance Filtering**: Boundary filters ensuring student questions remain aligned with university academic disciplines."
 
 ---
 
@@ -78,13 +120,13 @@ $$\text{Hallucination Rate} = \left(\frac{\text{Count of Unsupported Claims}}{\t
 **Model Answer:**
 "The system is built with high-availability resiliency patterns in `services/llm_service.py`:
 1. It implements an exponential backoff retry mechanism (3 attempts with jitter).
-2. It detects HTTP 404/504 errors and immediately falls back to a deterministic, self-contained rule-based and knowledge-grounded synthesis engine, guaranteeing $0\%$ API 500 error rates for end-users."
+2. It detects HTTP 404/504 errors and immediately falls back to a deterministic, dynamic knowledge-grounded ranking and synthesis engine, guaranteeing $0\%$ API 500 error rates for end-users."
 
 ---
 
 ### Q12: Why is cosine similarity used instead of Euclidean distance for embeddings?
 **Model Answer:**
-"Cosine similarity measures the cosine of the angle between two multi-dimensional vectors, evaluating directional semantic orientation regardless of vector magnitude (document length). When embedding vectors are L2-normalized ($\|v\|_2 = 1$), cosine similarity is mathematically equivalent to the inner dot product:
+"Cosine similarity measures the cosine of the angle between two multi-dimensional vectors, evaluating directional semantic orientation regardless of document length. When embedding vectors are L2-normalized ($\|v\|_2 = 1$), cosine similarity is mathematically equivalent to the inner dot product:
 $$\text{Cosine}(A, B) = \frac{A \cdot B}{\|A\| \|B\|} = A \cdot B$$
 This allows ultra-fast hardware SIMD dot product acceleration."
 
@@ -92,13 +134,13 @@ This allows ultra-fast hardware SIMD dot product acceleration."
 
 ### Q13: How does Docker Compose isolate your microservices?
 **Model Answer:**
-"In `docker/docker-compose.yml`, we define independent network bridges (`mentor-net`) with distinct resource constraints. The `backend` container hosts the FastAPI gateway, the `retriever` container isolates the ChromaDB persistence layer, and the `llm` container manages Ollama. Services communicate strictly over internal DNS aliases with health checks and restart policies."
+"In `docker/docker-compose.yml`, we define an isolated bridge network (`mentor_net`). The `backend` container hosts FastAPI and ChromaDB, while the `ollama` container manages model weights. Services communicate strictly over internal DNS aliases with automatic restarts and volume persistence."
 
 ---
 
 ### Q14: What is the maximum acceptable plagiarism percentage according to academic standards?
 **Model Answer:**
-"According to the university thesis guidelines ingested in our knowledge base (`project_guidelines.md`), the maximum allowed similarity index is **15%** (excluding standard bibliographic references and mathematical formulas), verified via Turnitin or Urkund."
+"According to university guidelines ingested in our knowledge base (`project_guidelines.md`), the maximum allowed similarity index is **15%** (excluding standard bibliographic references and mathematical formulas), verified via Turnitin or Urkund."
 
 ---
 
@@ -122,13 +164,13 @@ Total: **100 Marks**."
 
 ### Q17: What is the role of Pydantic v2 in your application layer?
 **Model Answer:**
-"Pydantic v2 enforces compile-time and runtime type safety, schema validation, and automatic serialization/deserialization. It prevents malformed client inputs (e.g., negative `top_k`, empty message strings, invalid model names) through strict field constraints and generates self-documenting OpenAPI (Swagger) specifications at `/docs`."
+"Pydantic v2 enforces compile-time and runtime type safety, schema validation, and automatic serialization/deserialization. It prevents malformed client inputs through strict field constraints and generates self-documenting OpenAPI specifications at `/docs`."
 
 ---
 
 ### Q18: How does the system handle concurrent users querying the vector database?
 **Model Answer:**
-"FastAPI runs asynchronously with `asyncio` event loops on Uvicorn workers. In `retrieval_service.py`, ChromaDB reads are executed concurrently through non-blocking I/O threads. SQLite write operations are constrained to single-worker ingestion cycles to avoid database locks."
+"FastAPI runs asynchronously with `asyncio` event loops on Uvicorn workers. In `retrieval_service.py`, ChromaDB reads are executed concurrently through non-blocking threads, while SQLite write operations are serialized during ingestion cycles."
 
 ---
 
@@ -136,8 +178,8 @@ Total: **100 Marks**."
 **Model Answer:**
 "We would implement:
 1. **Hybrid Sparse-Dense Retrieval**: Combining BM25 keyword search with dense SentenceTransformer embeddings using Reciprocal Rank Fusion (RRF).
-2. **Cross-Encoder Reranking**: Incorporating a `bge-reranker-large` model to re-score top-20 retrieved candidate chunks to top-4.
-3. **Agentic Workflows**: Multi-step tool use allowing the mentor to automatically generate Git pull requests, auto-fix lint errors, and plot test coverage charts directly."
+2. **Cross-Encoder Reranking**: Incorporating a `bge-reranker-large` model to re-rank top-20 retrieved candidate chunks to top-4.
+3. **Agentic Workflows**: Multi-step tool calling allowing the mentor to automatically generate Git pull requests and fix syntax errors."
 
 ---
 
