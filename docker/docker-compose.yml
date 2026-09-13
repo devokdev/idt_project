@@ -21,12 +21,15 @@ services:
     container_name: mentor_backend
     ports:
       - "8000:8000"
+    env_file:
+      - ../.env
     environment:
       - APP_ENV=production
       - HOST=0.0.0.0
       - PORT=8000
+      - GROQ_API_KEY=${GROQ_API_KEY}
       - OLLAMA_BASE_URL=http://ollama:11434
-      - DEFAULT_MODEL=phi3:mini
+      - DEFAULT_MODEL=openai/gpt-oss-20b
     volumes:
       - ../knowledge_base/vectordb:/app/knowledge_base/vectordb
       - ../logs:/app/logs

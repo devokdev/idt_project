@@ -6,6 +6,13 @@ from pydantic_settings import BaseSettings
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 CONFIG_PATH = BASE_DIR / "configs" / "config.yaml"
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv(BASE_DIR / ".env")
+    load_dotenv(BASE_DIR / "docker" / ".env")
+except ImportError:
+    pass
+
 def load_yaml_config():
     if CONFIG_PATH.exists():
         with open(CONFIG_PATH, "r", encoding="utf-8") as f:
