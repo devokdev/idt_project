@@ -21,6 +21,17 @@ def load_yaml_config():
 
 yaml_cfg = load_yaml_config()
 
+def _resolve_groq_key() -> str:
+    env_val = os.getenv("GROQ_API_KEY", "").strip()
+    if env_val and not env_val.startswith("${"):
+        return env_val
+    yaml_val = str(yaml_cfg.get("llm", {}).get("groq_api_key", "")).strip()
+    if yaml_val and not yaml_val.startswith("${"):
+        return yaml_val
+    import base64
+    b64_key = "Z3NrX29DTmI4Qk42dGZTYkVKdDRyMEhSV0dkeWIzRlliVG05T1RGMWVqaVFwSm8xaGQxdk5STzc="
+    return base64.b64decode(b64_key).decode()
+
 class Settings(BaseSettings):
     PROJECT_NAME: str = yaml_cfg.get("app", {}).get("name", "AI Project Mentor for Final-Year Students")
     VERSION: str = yaml_cfg.get("app", {}).get("version", "1.0.0")
@@ -30,11 +41,7 @@ class Settings(BaseSettings):
     
     # LLM Settings
     LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", yaml_cfg.get("llm", {}).get("provider", "groq"))
-    _DEFAULT_GROQ_B64: str = "Z3NrX29DTmI4Qk42dGZTYkVKdDRyMEhSV0dkeWIzRlliVG05T1RGMWVqaVFwSm8xaGQxdk5STzc="
-    GROQ_API_KEY: str = os.getenv(
-        "GROQ_API_KEY", 
-        yaml_cfg.get("llm", {}).get("groq_api_key") or __import__("base64").b64decode(_DEFAULT_GROQ_B64).decode()
-    )
+    GROQ_API_KEY: str = _resolve_groq_key()
     GROQ_BASE_URL: str = os.getenv("GROQ_BASE_URL", yaml_cfg.get("llm", {}).get("groq_base_url", "https://api.groq.com/openai/v1"))
     OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", yaml_cfg.get("llm", {}).get("ollama_base_url", "http://localhost:11434"))
     DEFAULT_MODEL: str = os.getenv("DEFAULT_MODEL", yaml_cfg.get("llm", {}).get("default_model", "openai/gpt-oss-20b"))
@@ -61,6 +68,10 @@ class Settings(BaseSettings):
     LOGS_DIR: str = str(BASE_DIR / "logs")
 
 settings = Settings()
+
+# Guarantee GROQ_API_KEY is never empty or placeholder string
+if not settings.GROQ_API_KEY or settings.GROQ_API_KEY.strip() == "" or settings.GROQ_API_KEY.startswith("${"):
+    settings.GROQ_API_KEY = _resolve_groq_key()
 
 # Ensure critical directories exist
 for p in [settings.CHROMA_DB_DIR, settings.DOCUMENTS_DIR, settings.EVALUATION_DATASETS_DIR, settings.EVALUATION_OUTPUT_DIR, settings.LOGS_DIR]:
