@@ -1,6 +1,7 @@
 import time
 import json
 import logging
+import re
 import httpx
 from typing import Dict, Any, Optional, List
 from backend.app.config import settings
@@ -10,36 +11,46 @@ logging.basicConfig(level=logging.INFO)
 
 class LLMService:
     """
-    Robust Ollama LLM Service supporting Code Llama, StarCoder2, and Phi-3 Mini.
-    Includes timeouts, exponential retry backoff, fallback execution, and simulated inference
-    for zero-dependency offline environments/testing.
+    High-Performance LLM Service powered by Groq LPU Cloud Engine.
+    Supports ultra-fast inference across Groq models (openai/gpt-oss-20b, openai/gpt-oss-120b,
+    qwen/qwen3.8-27b, groq/compound-mini), with fallback execution for offline/network-restricted setups.
     """
-    def __init__(self, base_url: Optional[str] = None):
-        self.base_url = (base_url or settings.OLLAMA_BASE_URL).rstrip("/")
+    def __init__(self, api_key: Optional[str] = None, base_url: Optional[str] = None):
+        self.api_key = api_key or settings.GROQ_API_KEY
+        self.base_url = (base_url or settings.GROQ_BASE_URL).rstrip("/")
         self.default_model = settings.DEFAULT_MODEL
         self.timeout = settings.LLM_TIMEOUT
         self.max_retries = settings.MAX_RETRIES
 
     def check_health(self) -> Dict[str, Any]:
-        """Verify if Ollama service is reachable."""
+        """Verify if Groq Cloud API service is reachable with current API key."""
+        headers = {
+            "Authorization": f"Bearer {self.api_key}"
+        }
         try:
-            with httpx.Client(timeout=3.0) as client:
-                res = client.get(f"{self.base_url}/api/tags")
+            with httpx.Client(timeout=4.0) as client:
+                res = client.get(f"{self.base_url}/models", headers=headers)
                 if res.status_code == 200:
-                    models_data = res.json().get("models", [])
-                    model_names = [m.get("name") for m in models_data]
+                    models_data = res.json().get("data", [])
+                    active_models = [m.get("id") for m in models_data if m.get("active", True)]
                     return {
                         "status": "healthy",
-                        "ollama_reachable": True,
-                        "available_models": model_names
+                        "provider": "Groq Cloud LPU",
+                        "groq_reachable": True,
+                        "available_models": active_models,
+                        "selected_default": self.default_model
                     }
+                else:
+                    logger.warning(f"Groq API returned HTTP {res.status_code}: {res.text}")
         except Exception as e:
-            logger.warning(f"Ollama server not reachable at {self.base_url}: {e}. Mock/Fallback mode active.")
-        
+            logger.warning(f"Groq API not reachable at {self.base_url}: {e}. Fallback engine ready.")
+
         return {
             "status": "offline_fallback_ready",
-            "ollama_reachable": False,
-            "available_models": settings.SUPPORTED_MODELS
+            "provider": "Groq Cloud (Offline/Fallback)",
+            "groq_reachable": False,
+            "available_models": settings.SUPPORTED_MODELS,
+            "selected_default": self.default_model
         }
 
     def generate(
@@ -48,59 +59,98 @@ class LLMService:
         model: Optional[str] = None, 
         temperature: float = 0.2,
         system_prompt: Optional[str] = None,
-        stream: bool = False
+        stream: bool = False,
+        max_tokens: int = 2048
     ) -> Dict[str, Any]:
         """
-        Executes text generation with automatic retries, timing metrics, and offline fallback.
+        Executes text generation using Groq API with reasoning token unwrapping,
+        automatic retries, timing metrics, and offline fallback.
         """
         target_model = model or self.default_model
+        if target_model in ["phi3:mini", "phi3:latest", "codellama:latest", "starcoder2:latest", "auto"]:
+            target_model = self.default_model
+
         start_time = time.time()
-        
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
+
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        else:
+            messages.append({
+                "role": "system",
+                "content": (
+                    "You are an expert AI Project Mentor for final-year engineering students. "
+                    "Provide authoritative, structured, clear, and technically grounded answers "
+                    "referencing the student's project documents, rubric marks, and software standards."
+                )
+            })
+
+        messages.append({"role": "user", "content": prompt})
+
         payload = {
             "model": target_model,
-            "prompt": prompt,
-            "stream": stream,
-            "options": {
-                "temperature": temperature,
-                "top_p": 0.9,
-                "num_ctx": 1536,
-                "num_predict": 512
-            }
+            "messages": messages,
+            "temperature": max(0.0, min(1.0, temperature)),
+            "max_completion_tokens": max_tokens
         }
-        if system_prompt:
-            payload["system"] = system_prompt
 
         last_error = None
         for attempt in range(1, self.max_retries + 1):
             try:
                 with httpx.Client(timeout=self.timeout) as client:
                     response = client.post(
-                        f"{self.base_url}/api/generate",
+                        f"{self.base_url}/chat/completions",
+                        headers=headers,
                         json=payload
                     )
                     if response.status_code == 200:
                         data = response.json()
                         latency = (time.time() - start_time) * 1000
+                        choice = data.get("choices", [{}])[0]
+                        msg_obj = choice.get("message", {})
+                        
+                        # Extract content or reasoning if content is empty
+                        raw_content = msg_obj.get("content") or ""
+                        reasoning_content = msg_obj.get("reasoning") or ""
+                        
+                        final_text = raw_content.strip()
+                        if not final_text and reasoning_content.strip():
+                            final_text = reasoning_content.strip()
+
+                        # Strip thinking tags if present in some open-source models
+                        final_text = re.sub(r"<think>[\s\S]*?</think>", "", final_text).strip()
+
+                        usage = data.get("usage", {})
+                        p_tokens = usage.get("prompt_tokens", len(prompt.split()))
+                        c_tokens = usage.get("completion_tokens", len(final_text.split()))
+
                         return {
-                            "text": data.get("response", ""),
+                            "text": final_text,
                             "model": target_model,
                             "latency_ms": round(latency, 2),
-                            "prompt_eval_count": data.get("prompt_eval_count", len(prompt.split())),
-                            "eval_count": data.get("eval_count", len(data.get("response", "").split())),
-                            "is_fallback": False
+                            "prompt_eval_count": p_tokens,
+                            "eval_count": c_tokens,
+                            "is_fallback": False,
+                            "provider": "Groq Cloud LPU"
                         }
                     elif response.status_code == 404:
-                        logger.warning(f"Model '{target_model}' not found in local Ollama instance (HTTP 404). Falling back immediately.")
+                        logger.warning(f"Model '{target_model}' not found in Groq. Falling back.")
+                        last_error = f"Model {target_model} 404 Not Found"
                         break
                     else:
-                        logger.warning(f"Ollama returned HTTP {response.status_code} on attempt {attempt}: {response.text}")
+                        last_error = f"HTTP {response.status_code}: {response.text}"
+                        logger.warning(f"Groq API error on attempt {attempt}: {last_error}")
             except (httpx.RequestError, httpx.TimeoutException) as e:
                 last_error = str(e)
-                logger.warning(f"Attempt {attempt}/{self.max_retries} failed connecting to Ollama ({e}). Retrying...")
-                time.sleep(0.5 * (1.5 ** attempt))
+                logger.warning(f"Attempt {attempt}/{self.max_retries} failed connecting to Groq ({e}). Retrying...")
+                time.sleep(0.4 * attempt)
 
-        # If Ollama is offline or model is pulling, provide high-quality fallback synthesis
-        logger.info(f"Using deterministic architectural fallback response for model '{target_model}'.")
+        # High quality fallback synthesis if Groq cloud is unreachable
+        logger.info(f"Using deterministic fallback response for model '{target_model}'.")
         fallback_text = self._generate_fallback_response(prompt, target_model)
         latency = (time.time() - start_time) * 1000
         return {
@@ -110,13 +160,14 @@ class LLMService:
             "prompt_eval_count": len(prompt.split()),
             "eval_count": len(fallback_text.split()),
             "is_fallback": True,
-            "warning": f"Generated via Academic Mentor Engine (Ollama daemon offline: {last_error})"
+            "provider": "Academic Mentor Engine (Fallback)",
+            "warning": f"Generated via Academic Mentor Engine ({last_error})"
         }
 
     def _generate_fallback_response(self, prompt: str, model: str) -> str:
         """
-        Universal dynamic RAG summarizer when Ollama is offline or pulling models.
-        Extracts, ranks, and structures factual sentences from retrieved context documents for any question.
+        Universal dynamic RAG summarizer when external cloud API is offline.
+        Extracts, ranks, and structures factual sentences from retrieved context documents.
         """
         prompt_lower = prompt.lower()
         
@@ -126,7 +177,6 @@ class LLMService:
                 context_part = prompt.split("### ACADEMIC & PROJECT GUIDELINES CONTEXT:")[1].split("### INSTRUCTION FOR MENTOR:")[0].strip()
                 student_q = prompt.split("Student Question:")[1].split("Mentor Answer:")[0].strip()
                 
-                # Clean document delimiters and extract sections
                 lines = [l.strip() for l in context_part.split("\n") if l.strip()]
                 
                 meaningful_points = []
@@ -144,15 +194,12 @@ class LLMService:
                         else:
                             meaningful_points.append(cleaned)
                 
-                # Extract query keywords
                 q_words = set(w.lower() for w in student_q.replace("?", "").replace(",", "").split() if len(w) > 2)
                 
-                # Rank sentences by keyword overlap and semantic relevance
                 ranked_points = []
                 for pt in meaningful_points:
                     pt_lower = pt.lower()
                     overlap = sum(2 if w in pt_lower else 0 for w in q_words)
-                    # Boost Q&A and rubric answers
                     if "answer" in pt_lower or "rubric" in pt_lower or "guideline" in pt_lower or "deliverable" in pt_lower:
                         overlap += 1
                     ranked_points.append((overlap, pt))
@@ -174,7 +221,6 @@ class LLMService:
             except Exception as e:
                 logger.error(f"Error in dynamic RAG extraction: {e}")
         
-        # General response when RAG is disabled or no context is found
         return (
             f"### AI Project Mentor Guidance [{model}]:\n\n"
             "For your final-year project inquiry, follow these standard steps:\n"

@@ -7,16 +7,18 @@ app:
   port: 8000
   log_level: "INFO"
 
-# Ollama & LLM Configuration
+# LLM & Groq Configuration
 llm:
+  provider: "groq"
+  groq_api_key: "${GROQ_API_KEY}"
+  groq_base_url: "https://api.groq.com/openai/v1"
   ollama_base_url: "http://localhost:11434"
-  default_model: "phi3:mini"
+  default_model: "openai/gpt-oss-20b"
   supported_models:
-    - "phi3:mini"
-    - "phi3:latest"
-    - "codellama:latest"
-    - "starcoder2:latest"
-  timeout_seconds: 180
+    - "openai/gpt-oss-20b"
+    - "openai/gpt-oss-120b"
+    - "qwen/qwen3.8-27b"
+  timeout_seconds: 60
   max_retries: 2
   retry_backoff_factor: 1.5
   temperature: 0.2

@@ -107,3 +107,30 @@ class RepoQuestionResponse(BaseModel):
 class SuggestionResponse(BaseModel):
     query_prefix: str
     suggestions: List[str]
+
+# Multi-Model Comparison Schemas
+class CompareModelResult(BaseModel):
+    model: str
+    answer: str
+    latency_ms: float
+    grounding_score: float
+    hallucination_rate: float
+    token_count: int
+    provider: str
+
+class CompareModelsRequest(BaseModel):
+    prompt: str = Field(..., description="Student query or question")
+    models: Optional[List[str]] = Field(
+        default=["openai/gpt-oss-20b", "openai/gpt-oss-120b", "qwen/qwen3.8-27b"],
+        description="List of models to compare"
+    )
+    use_rag: bool = Field(True, description="Enable Retrieval-Augmented Generation")
+    top_k: int = Field(4, ge=1, le=10)
+
+class CompareModelsResponse(BaseModel):
+    prompt: str
+    used_rag: bool
+    retrieved_chunks_count: int
+    retrieval_latency_ms: float
+    results: List[CompareModelResult]
+    context: List[ContextChunk] = []

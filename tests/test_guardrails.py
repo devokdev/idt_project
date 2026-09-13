@@ -14,13 +14,13 @@ def test_guardrail_blocked_input():
 
 def test_routing_service_logic():
     code_route = routing_service.route_model("Write a python function to parse AST")
-    assert code_route["selected_model"] == "starcoder2:latest"
+    assert code_route["selected_model"] == "openai/gpt-oss-120b"
 
     arch_route = routing_service.route_model("Explain the complete microservices architecture and system design trade-offs")
-    assert arch_route["selected_model"] == "codellama:latest"
+    assert arch_route["selected_model"] == "openai/gpt-oss-20b"
 
     simple_route = routing_service.route_model("What is Git?")
-    assert simple_route["selected_model"] in ["phi3:mini", "phi3:latest"]
+    assert simple_route["selected_model"] == "groq/compound-mini"
 
 def test_hallucination_service():
     context = [{"content": "Technical implementation carries 35 marks out of 100 in the rubric."}]

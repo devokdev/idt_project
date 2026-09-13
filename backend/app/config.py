@@ -22,10 +22,15 @@ class Settings(BaseSettings):
     PORT: int = int(os.getenv("PORT", yaml_cfg.get("app", {}).get("port", 8000)))
     
     # LLM Settings
+    LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", yaml_cfg.get("llm", {}).get("provider", "groq"))
+    GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", yaml_cfg.get("llm", {}).get("groq_api_key", ""))
+    GROQ_BASE_URL: str = os.getenv("GROQ_BASE_URL", yaml_cfg.get("llm", {}).get("groq_base_url", "https://api.groq.com/openai/v1"))
     OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", yaml_cfg.get("llm", {}).get("ollama_base_url", "http://localhost:11434"))
-    DEFAULT_MODEL: str = os.getenv("DEFAULT_MODEL", yaml_cfg.get("llm", {}).get("default_model", "codellama:latest"))
-    SUPPORTED_MODELS: list = yaml_cfg.get("llm", {}).get("supported_models", ["codellama:latest", "starcoder2:latest", "phi3:latest"])
-    LLM_TIMEOUT: int = int(os.getenv("LLM_TIMEOUT", yaml_cfg.get("llm", {}).get("timeout_seconds", 120)))
+    DEFAULT_MODEL: str = os.getenv("DEFAULT_MODEL", yaml_cfg.get("llm", {}).get("default_model", "openai/gpt-oss-20b"))
+    SUPPORTED_MODELS: list = yaml_cfg.get("llm", {}).get("supported_models", [
+        "openai/gpt-oss-20b", "openai/gpt-oss-120b", "qwen/qwen3.8-27b"
+    ])
+    LLM_TIMEOUT: int = int(os.getenv("LLM_TIMEOUT", yaml_cfg.get("llm", {}).get("timeout_seconds", 60)))
     MAX_RETRIES: int = int(os.getenv("MAX_RETRIES", yaml_cfg.get("llm", {}).get("max_retries", 2)))
     
     # RAG Settings

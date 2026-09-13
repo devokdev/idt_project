@@ -35,7 +35,7 @@ class ModelEvaluator:
         sample_size: int = 30,
         save_results: bool = True
     ) -> Dict[str, Any]:
-        target_models = models or ["codellama:latest", "starcoder2:latest", "phi3:latest"]
+        target_models = models or ["openai/gpt-oss-20b", "openai/gpt-oss-120b", "qwen/qwen3.8-27b"]
         dataset = self.load_dataset()[:sample_size]
         
         all_eval_records = []

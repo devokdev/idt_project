@@ -7,36 +7,36 @@ router = APIRouter(prefix="", tags=["Models & Inference Engines"])
 
 MODEL_REGISTRY = [
     {
-        "name": "codellama:latest",
-        "description": "Code Llama 7B Instruct - Specialized for code generation, software architecture, and debugging.",
-        "size": "3.8 GB",
+        "name": "openai/gpt-oss-20b",
+        "description": "OpenAI GPT Open-Source 20B on Groq LPU - Ultra-low latency conversational mentor and RAG synthesizer.",
+        "size": "20 Billion Parameters (LPU Hosted)",
     },
     {
-        "name": "starcoder2:latest",
-        "description": "StarCoder2 - Multi-language code intelligence and syntax validation model.",
-        "size": "1.7 GB",
+        "name": "openai/gpt-oss-120b",
+        "description": "OpenAI GPT Open-Source 120B on Groq LPU - Massive reasoning capacity for deep architectural trade-offs and code intelligence.",
+        "size": "120 Billion Parameters (LPU Hosted)",
     },
     {
-        "name": "phi3:latest",
-        "description": "Phi-3 Mini (3.8B) - Lightweight, fast reasoning, high-efficiency model.",
-        "size": "2.2 GB",
+        "name": "qwen/qwen3.8-27b",
+        "description": "Alibaba Qwen 3.8 27B on Groq LPU - High-speed reasoning, mathematics, and structured logic formulation.",
+        "size": "27 Billion Parameters (LPU Hosted)",
     }
 ]
 
 @router.get("/models", response_model=ModelsListResponse)
 async def list_models():
-    """Lists supported and installed LLM models."""
+    """Lists supported and active Groq LPU models."""
     health_status = llm_service.check_health()
-    available_in_ollama = health_status.get("available_models", [])
+    available_in_groq = health_status.get("available_models", [])
     
     models_info = []
     for m in MODEL_REGISTRY:
-        is_avail = (m["name"] in available_in_ollama) or health_status.get("ollama_reachable", False)
+        is_avail = (m["name"] in available_in_groq) or health_status.get("groq_reachable", False)
         models_info.append(ModelInfo(
             name=m["name"],
             description=m["description"],
             size=m["size"],
-            status="Available / Ready" if is_avail else "Download required (ollama pull)",
+            status="Available / High-Speed LPU" if is_avail else "Ready via Groq Cloud API",
             is_available=is_avail
         ))
 

@@ -1,62 +1,62 @@
 [
   {
-    "model_name": "codellama:latest",
+    "model_name": "openai/gpt-oss-20b",
     "metrics": {
-      "correctness": 0.413,
-      "relevance": 0.603,
-      "precision_at_k": 0.367,
-      "recall_at_k": 0.35,
-      "mrr": 0.383,
-      "hallucination_rate": 32.38,
-      "code_pass_rate": 0.96,
-      "avg_latency_ms": 2917.62,
-      "prompt_tokens": 10094,
-      "completion_tokens": 2294
-    },
-    "hardware_stats": {
-      "cpu_usage_pct": 45.5,
-      "ram_used_mb": 14360.66,
-      "ram_delta_mb": -18.16
-    }
-  },
-  {
-    "model_name": "starcoder2:latest",
-    "metrics": {
-      "correctness": 0.415,
-      "relevance": 0.605,
-      "precision_at_k": 0.367,
-      "recall_at_k": 0.35,
-      "mrr": 0.383,
-      "hallucination_rate": 32.38,
-      "code_pass_rate": 0.96,
-      "avg_latency_ms": 2863.79,
-      "prompt_tokens": 10094,
-      "completion_tokens": 2294
-    },
-    "hardware_stats": {
-      "cpu_usage_pct": 43.9,
-      "ram_used_mb": 15293.73,
-      "ram_delta_mb": 933.07
-    }
-  },
-  {
-    "model_name": "phi3:latest",
-    "metrics": {
-      "correctness": 0.412,
-      "relevance": 0.602,
-      "precision_at_k": 0.367,
-      "recall_at_k": 0.35,
-      "mrr": 0.383,
-      "hallucination_rate": 32.38,
+      "correctness": 0.598,
+      "relevance": 0.662,
+      "precision_at_k": 0.375,
+      "recall_at_k": 1.117,
+      "mrr": 0.661,
+      "hallucination_rate": 40.75,
       "code_pass_rate": 0.88,
-      "avg_latency_ms": 3014.66,
-      "prompt_tokens": 10094,
-      "completion_tokens": 2294
+      "avg_latency_ms": 1585.98,
+      "prompt_tokens": 22389,
+      "completion_tokens": 14412
     },
     "hardware_stats": {
-      "cpu_usage_pct": 37.6,
-      "ram_used_mb": 14261.42,
-      "ram_delta_mb": -1032.32
+      "cpu_usage_pct": 19.4,
+      "ram_used_mb": 13501.1,
+      "ram_delta_mb": 718.66
+    }
+  },
+  {
+    "model_name": "openai/gpt-oss-120b",
+    "metrics": {
+      "correctness": 0.597,
+      "relevance": 0.656,
+      "precision_at_k": 0.375,
+      "recall_at_k": 1.117,
+      "mrr": 0.661,
+      "hallucination_rate": 38.61,
+      "code_pass_rate": 0.88,
+      "avg_latency_ms": 1479.77,
+      "prompt_tokens": 21967,
+      "completion_tokens": 13815
+    },
+    "hardware_stats": {
+      "cpu_usage_pct": 15.3,
+      "ram_used_mb": 13434.53,
+      "ram_delta_mb": -66.57
+    }
+  },
+  {
+    "model_name": "qwen/qwen3.8-27b",
+    "metrics": {
+      "correctness": 0.576,
+      "relevance": 0.657,
+      "precision_at_k": 0.375,
+      "recall_at_k": 1.117,
+      "mrr": 0.661,
+      "hallucination_rate": 30.01,
+      "code_pass_rate": 0.88,
+      "avg_latency_ms": 1049.37,
+      "prompt_tokens": 19686,
+      "completion_tokens": 10353
+    },
+    "hardware_stats": {
+      "cpu_usage_pct": 15.7,
+      "ram_used_mb": 13484.51,
+      "ram_delta_mb": 49.98
     }
   }
 ]

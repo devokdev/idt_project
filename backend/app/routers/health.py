@@ -9,8 +9,8 @@ router = APIRouter(prefix="", tags=["System Health & Metrics"])
 
 @router.get("/health")
 async def health_check():
-    """System health check verifying ChromaDB, LLM connection, and memory status."""
-    ollama_health = llm_service.check_health()
+    """System health check verifying ChromaDB, Groq LPU connection, and memory status."""
+    groq_health = llm_service.check_health()
     kb_stats = retrieval_service.get_stats()
     
     return {
@@ -18,7 +18,8 @@ async def health_check():
         "app_name": settings.PROJECT_NAME,
         "version": settings.VERSION,
         "environment": settings.ENV,
-        "ollama": ollama_health,
+        "llm": groq_health,
+        "ollama": groq_health, # backward compatibility
         "vectordb": {
             "status": "connected",
             "kb_documents_count": kb_stats["default_collection_count"],

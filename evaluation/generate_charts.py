@@ -19,7 +19,7 @@ def generate_evaluation_visualizations():
     print("=" * 60)
 
     eval_output = model_evaluator.run_benchmark(
-        models=["codellama:latest", "starcoder2:latest", "phi3:latest"],
+        models=["openai/gpt-oss-20b", "openai/gpt-oss-120b", "qwen/qwen3.8-27b"],
         sample_size=30,
         save_results=True
     )
@@ -28,7 +28,7 @@ def generate_evaluation_visualizations():
     out_dir = Path(settings.EVALUATION_OUTPUT_DIR)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    models = [s["model_name"].split(":")[0] for s in summaries]
+    models = [s["model_name"].split("/")[-1] for s in summaries]
     correctness = [s["metrics"]["correctness"] * 100 for s in summaries]
     relevance = [s["metrics"]["relevance"] * 100 for s in summaries]
     latency = [s["metrics"]["avg_latency_ms"] for s in summaries]

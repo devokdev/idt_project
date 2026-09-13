@@ -4,209 +4,284 @@
     "category": "Project Idea",
     "question": "How do I choose an innovative final-year engineering project topic in AI/ML?",
     "ground_truth": "Choose a topic addressing a real-world gap with measurable outcomes, recent literature citations (last 3-5 years), and clear technical novelty.",
-    "expected_sources": ["project_guidelines.md", "project_proposal_template.md"]
+    "expected_sources": [
+      "kb1_rubric_and_defense_standards.md"
+    ]
   },
   {
     "id": 2,
     "category": "Project Idea",
     "question": "What makes a project proposal acceptable according to academic guidelines?",
     "ground_truth": "A 3-page synopsis detailing problem statement, motivation, methodology, module breakdown, technology readiness assessment, and team roles.",
-    "expected_sources": ["project_proposal_template.md", "project_guidelines.md"]
+    "expected_sources": [
+      "kb1_rubric_and_defense_standards.md"
+    ]
   },
   {
     "id": 3,
     "category": "Architecture",
     "question": "What is the recommended system architecture for an AI/ML web application?",
     "ground_truth": "Decoupled 3-tier architecture with FastAPI backend, ChromaDB vector database, local LLM orchestration via Ollama, and responsive UI.",
-    "expected_sources": ["ai_ml_workflow_documentation.md", "project_proposal_template.md"]
+    "expected_sources": [
+      "kb2_rag_and_llm_architecture.md",
+      "kb4_dbms_and_system_design_master.md"
+    ]
   },
   {
     "id": 4,
     "category": "Architecture",
     "question": "Why should services be decoupled into microservices or modular layers in engineering projects?",
     "ground_truth": "Decoupling ensures separation of concerns, independent scalability, isolated fault domains, and modular testing.",
-    "expected_sources": ["ai_ml_workflow_documentation.md", "evaluation_rubric.md"]
+    "expected_sources": [
+      "kb4_dbms_and_system_design_master.md",
+      "kb1_rubric_and_defense_standards.md"
+    ]
   },
   {
     "id": 5,
     "category": "AI",
     "question": "What is Retrieval-Augmented Generation (RAG) and why is it preferred over fine-tuning?",
     "ground_truth": "RAG retrieves external verified context at query time without modifying model weights, avoiding catastrophic forgetting and hallucination.",
-    "expected_sources": ["ai_ml_workflow_documentation.md", "common_viva_questions.md"]
+    "expected_sources": [
+      "kb2_rag_and_llm_architecture.md"
+    ]
   },
   {
     "id": 6,
     "category": "AI",
     "question": "What role does Code Llama 7B Instruct play in this application?",
     "ground_truth": "Code Llama 7B is specialized for complex software architecture synthesis, code generation, debugging, and repository understanding.",
-    "expected_sources": ["ai_ml_workflow_documentation.md"]
+    "expected_sources": [
+      "kb2_rag_and_llm_architecture.md"
+    ]
   },
   {
     "id": 7,
     "category": "ML",
     "question": "What embedding model is used for dense vector search and what is its dimension?",
     "ground_truth": "The all-MiniLM-L6-v2 SentenceTransformer model producing 384-dimensional normalized dense vectors.",
-    "expected_sources": ["ai_ml_workflow_documentation.md"]
+    "expected_sources": [
+      "kb2_rag_and_llm_architecture.md"
+    ]
   },
   {
     "id": 8,
     "category": "ML",
     "question": "Why is L2 normalization applied to embedding vectors?",
     "ground_truth": "L2 normalization enables cosine similarity to be computed directly via fast dot products.",
-    "expected_sources": ["ai_ml_workflow_documentation.md"]
+    "expected_sources": [
+      "kb2_rag_and_llm_architecture.md"
+    ]
   },
   {
     "id": 9,
     "category": "Backend",
     "question": "Why is FastAPI chosen for the backend instead of Flask or Django?",
     "ground_truth": "FastAPI provides asynchronous concurrency, automatic OpenAPI documentation, high performance with Uvicorn, and Pydantic type validation.",
-    "expected_sources": ["project_proposal_template.md", "ai_ml_workflow_documentation.md"]
+    "expected_sources": [
+      "kb4_dbms_and_system_design_master.md",
+      "kb2_rag_and_llm_architecture.md"
+    ]
   },
   {
     "id": 10,
     "category": "Backend",
     "question": "How does the API Gateway handle timeouts and retries during LLM inference?",
     "ground_truth": "The gateway implements exponential backoff retry logic and fallback response mechanisms when the LLM server is unresponsive.",
-    "expected_sources": ["ai_ml_workflow_documentation.md"]
+    "expected_sources": [
+      "kb4_dbms_and_system_design_master.md",
+      "kb2_rag_and_llm_architecture.md"
+    ]
   },
   {
     "id": 11,
     "category": "Database",
     "question": "Why is ChromaDB chosen over traditional relational databases for RAG?",
     "ground_truth": "ChromaDB uses HNSW indexing for high-dimensional vector similarity search rather than exact B-Tree keyword matching.",
-    "expected_sources": ["common_viva_questions.md", "ai_ml_workflow_documentation.md"]
+    "expected_sources": [
+      "kb4_dbms_and_system_design_master.md",
+      "kb2_rag_and_llm_architecture.md"
+    ]
   },
   {
     "id": 12,
     "category": "Database",
     "question": "How are ChromaDB vector collections persisted across runs?",
     "ground_truth": "Via PersistentClient storage mounted to the persistent knowledge_base/vectordb directory.",
-    "expected_sources": ["common_viva_questions.md"]
+    "expected_sources": [
+      "kb4_dbms_and_system_design_master.md",
+      "kb2_rag_and_llm_architecture.md"
+    ]
   },
   {
     "id": 13,
     "category": "Deployment",
     "question": "How is the entire AI mentor application deployed using Docker Compose?",
     "ground_truth": "Using docker-compose.yml with isolated bridge networks, bind-mounted ChromaDB volumes, and Ollama service dependencies.",
-    "expected_sources": ["project_guidelines.md", "common_viva_questions.md"]
+    "expected_sources": [
+      "kb4_dbms_and_system_design_master.md",
+      "kb5_dsa_and_networks_master.md"
+    ]
   },
   {
     "id": 14,
     "category": "Deployment",
     "question": "What is the purpose of bind mounts in the docker compose configuration?",
     "ground_truth": "Bind mounts persist vector database records, logs, and evaluation charts between container rebuilds.",
-    "expected_sources": ["common_viva_questions.md"]
+    "expected_sources": [
+      "kb4_dbms_and_system_design_master.md"
+    ]
   },
   {
     "id": 15,
     "category": "Git",
     "question": "What is the standard Git branching model recommended for student teams?",
     "ground_truth": "GitFlow Lite: protected main branch, develop branch for integration, and feature/<name> branches for individual modules.",
-    "expected_sources": ["git_workflow_standards.md"]
+    "expected_sources": [
+      "kb1_rubric_and_defense_standards.md"
+    ]
   },
   {
     "id": 16,
     "category": "Git",
     "question": "What commit message convention should be used across the repository?",
     "ground_truth": "Conventional Commits using feat:, fix:, docs:, test:, and refactor: prefixes.",
-    "expected_sources": ["git_workflow_standards.md"]
+    "expected_sources": [
+      "kb1_rubric_and_defense_standards.md"
+    ]
   },
   {
     "id": 17,
     "category": "Documentation",
     "question": "What is the maximum allowed plagiarism percentage for the university thesis?",
     "ground_truth": "Similarity index must not exceed 15% using verified tools such as Turnitin or Urkund.",
-    "expected_sources": ["project_guidelines.md"]
+    "expected_sources": [
+      "kb1_rubric_and_defense_standards.md"
+    ]
   },
   {
     "id": 18,
     "category": "Documentation",
     "question": "What sections must be present in the Software Architecture Document (SAD)?",
     "ground_truth": "System overview, C4/UML diagrams, database schema normalization, API contracts, and security architecture.",
-    "expected_sources": ["project_guidelines.md", "evaluation_rubric.md"]
+    "expected_sources": [
+      "kb1_rubric_and_defense_standards.md",
+      "kb4_dbms_and_system_design_master.md"
+    ]
   },
   {
     "id": 19,
     "category": "Debugging",
     "question": "How do you troubleshoot a 504 Gateway Timeout when Ollama is running?",
     "ground_truth": "Check if model weights are still loading into VRAM, increase timeout_seconds in config.yaml, and verify Ollama port 11434.",
-    "expected_sources": ["git_workflow_standards.md"]
+    "expected_sources": [
+      "kb3_os_and_concurrency_master.md",
+      "kb5_dsa_and_networks_master.md"
+    ]
   },
   {
     "id": 20,
     "category": "Debugging",
     "question": "How do you detect and prevent memory leaks during vector indexing?",
     "ground_truth": "Process documents in batches, garbage-collect unused AST trees, and monitor RAM usage via psutil.",
-    "expected_sources": ["ai_ml_workflow_documentation.md"]
+    "expected_sources": [
+      "kb3_os_and_concurrency_master.md",
+      "kb2_rag_and_llm_architecture.md"
+    ]
   },
   {
     "id": 21,
     "category": "Repository",
     "question": "How does the repository understanding service extract symbols from Python files?",
     "ground_truth": "Using Python's abstract syntax tree (ast) module to extract ClassDef, FunctionDef, and Import nodes.",
-    "expected_sources": ["ai_ml_workflow_documentation.md"]
+    "expected_sources": [
+      "kb2_rag_and_llm_architecture.md",
+      "kb5_dsa_and_networks_master.md"
+    ]
   },
   {
     "id": 22,
     "category": "Repository",
     "question": "How does the system perform multi-file code impact analysis?",
     "ground_truth": "By indexing code chunks into ChromaDB and cross-referencing imported modules across files.",
-    "expected_sources": ["ai_ml_workflow_documentation.md"]
+    "expected_sources": [
+      "kb2_rag_and_llm_architecture.md",
+      "kb4_dbms_and_system_design_master.md"
+    ]
   },
   {
     "id": 23,
     "category": "RAG",
     "question": "What chunk size and overlap are used, and what is the rationale?",
     "ground_truth": "500 words with 80 words overlap to preserve semantic context without boundary clipping.",
-    "expected_sources": ["common_viva_questions.md", "ai_ml_workflow_documentation.md"]
+    "expected_sources": [
+      "kb2_rag_and_llm_architecture.md"
+    ]
   },
   {
     "id": 24,
     "category": "RAG",
     "question": "How are retrieved chunks deduplicated before prompt construction?",
     "ground_truth": "By tracking unique chunk hashes and filtering chunks below the similarity threshold.",
-    "expected_sources": ["ai_ml_workflow_documentation.md"]
+    "expected_sources": [
+      "kb2_rag_and_llm_architecture.md"
+    ]
   },
   {
     "id": 25,
     "category": "Evaluation",
     "question": "What is the weightage for Technical Implementation in the final rubric?",
     "ground_truth": "35 Marks out of 100 Marks.",
-    "expected_sources": ["evaluation_rubric.md"]
+    "expected_sources": [
+      "kb1_rubric_and_defense_standards.md"
+    ]
   },
   {
     "id": 26,
     "category": "Evaluation",
     "question": "What criteria are required to earn Exemplary marks in Quantitative Validation?",
     "ground_truth": "Rigorous metrics (F1, MRR, latency distributions P95/P99, RAM/CPU profiles) on verified datasets with comparative charts.",
-    "expected_sources": ["evaluation_rubric.md"]
+    "expected_sources": [
+      "kb1_rubric_and_defense_standards.md",
+      "kb2_rag_and_llm_architecture.md"
+    ]
   },
   {
     "id": 27,
     "category": "Viva",
     "question": "What are external examiners looking for during the project viva voce?",
     "ground_truth": "Individual contributions, algorithm complexity, justification for technology choices, and error handling defense.",
-    "expected_sources": ["evaluation_rubric.md", "common_viva_questions.md"]
+    "expected_sources": [
+      "kb1_rubric_and_defense_standards.md"
+    ]
   },
   {
     "id": 28,
     "category": "Viva",
     "question": "How do you explain the time complexity of vector retrieval in ChromaDB?",
     "ground_truth": "HNSW graph search achieves O(log N) average time complexity for nearest neighbor search.",
-    "expected_sources": ["common_viva_questions.md"]
+    "expected_sources": [
+      "kb2_rag_and_llm_architecture.md",
+      "kb5_dsa_and_networks_master.md"
+    ]
   },
   {
     "id": 29,
     "category": "Guardrails",
     "question": "How does the application guardrail against malicious prompt injections or cheating?",
     "ground_truth": "By filtering blacklisted keywords, enforcing length boundaries, and measuring groundedness against context.",
-    "expected_sources": ["project_guidelines.md"]
+    "expected_sources": [
+      "kb1_rubric_and_defense_standards.md",
+      "kb2_rag_and_llm_architecture.md"
+    ]
   },
   {
     "id": 30,
     "category": "Routing",
     "question": "How does the dynamic router choose between Phi-3 Mini, StarCoder2, and Code Llama?",
     "ground_truth": "Routes simple QA to Phi-3, code syntax queries to StarCoder2, and complex architectural design to Code Llama.",
-    "expected_sources": ["ai_ml_workflow_documentation.md"]
+    "expected_sources": [
+      "kb2_rag_and_llm_architecture.md"
+    ]
   }
 ]

@@ -7,7 +7,7 @@ client = TestClient(app)
 def test_chat_endpoint_success():
     payload = {
         "prompt": "What are the common viva defense questions for final-year projects?",
-        "model": "codellama:latest",
+        "model": "openai/gpt-oss-20b",
         "use_rag": True,
         "top_k": 3
     }
@@ -15,7 +15,7 @@ def test_chat_endpoint_success():
     assert response.status_code == 200
     data = response.json()
     assert "answer" in data
-    assert data["model"] == "codellama:latest"
+    assert "openai/gpt-oss-20b" in data["model"]
     assert "latency_ms" in data
     assert data["used_rag"] is True
 
@@ -53,3 +53,15 @@ def test_suggestions_endpoint():
     data = response.json()
     assert "suggestions" in data
     assert len(data["suggestions"]) > 0
+
+def test_compare_models_endpoint():
+    payload = {
+        "prompt": "What are the marks for technical implementation?",
+        "models": ["openai/gpt-oss-20b", "openai/gpt-oss-120b"],
+        "use_rag": True
+    }
+    response = client.post("/compare-models", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["results"]) == 2
+    assert "latency_ms" in data["results"][0]

@@ -3,10 +3,10 @@ from typing import List, Dict, Any
 
 class TextChunker:
     """
-    Configurable semantic chunker with sliding window overlap and structural metadata attachment.
-    Splits text across paragraphs, sentences, or word windows to strictly respect max chunk size.
+    Configurable semantic chunker with paragraph and sliding window splitting.
+    Splits larger documents into coherent thematic chunks with sliding overlap.
     """
-    def __init__(self, chunk_size: int = 500, chunk_overlap: int = 80):
+    def __init__(self, chunk_size: int = 150, chunk_overlap: int = 40):
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
 
@@ -17,28 +17,28 @@ class TextChunker:
         if not text.strip():
             return []
 
-        # Split into words for fine-grained sliding window control
-        words = text.split()
-        if not words:
-            return []
-
+        # Split across markdown sections (## ) first if possible
+        sections = re.split(r'\n(?=##?\s+)', text)
         chunks = []
-        start_idx = 0
-        total_words = len(words)
 
-        while start_idx < total_words:
-            end_idx = min(start_idx + self.chunk_size, total_words)
-            chunk_words = words[start_idx:end_idx]
-            chunk_str = " ".join(chunk_words)
-            chunks.append(chunk_str)
+        for sec in sections:
+            sec_clean = sec.strip()
+            if not sec_clean:
+                continue
+            words = sec_clean.split()
+            if len(words) <= self.chunk_size:
+                chunks.append(sec_clean)
+            else:
+                # Sliding window over large sections
+                start = 0
+                while start < len(words):
+                    end = min(start + self.chunk_size, len(words))
+                    sub_words = words[start:end]
+                    chunks.append(" ".join(sub_words))
+                    if end >= len(words):
+                        break
+                    start += (self.chunk_size - self.chunk_overlap)
 
-            if end_idx >= total_words:
-                break
-            start_idx += (self.chunk_size - self.chunk_overlap)
-            if start_idx <= 0 or start_idx >= end_idx:
-                start_idx = end_idx
-
-        # Format output chunk objects with metadata
         result = []
         for idx, chunk_str in enumerate(chunks):
             chunk_meta = base_meta.copy()
@@ -46,7 +46,6 @@ class TextChunker:
             chunk_meta["total_chunks"] = len(chunks)
             chunk_meta["word_count"] = len(chunk_str.split())
             
-            # Extract possible section header
             first_line = chunk_str.strip().split("\n")[0]
             if first_line.startswith("#"):
                 chunk_meta["section"] = first_line.lstrip("#").strip()

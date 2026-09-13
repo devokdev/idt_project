@@ -2,9 +2,9 @@
 
 | Model | Correctness | Relevance | Precision@4 | Recall@4 | MRR | Hallucination % | Code Pass % | Latency (ms) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **codellama:latest** | 0.413 | 0.603 | 0.367 | 0.350 | 0.383 | 32.38% | 96.0% | 2917.62 ms |
-| **starcoder2:latest** | 0.415 | 0.605 | 0.367 | 0.350 | 0.383 | 32.38% | 96.0% | 2863.79 ms |
-| **phi3:latest** | 0.412 | 0.602 | 0.367 | 0.350 | 0.383 | 32.38% | 88.0% | 3014.66 ms |
+| **openai/gpt-oss-20b** | 0.598 | 0.662 | 0.375 | 1.117 | 0.661 | 40.75% | 88.0% | 1585.98 ms |
+| **openai/gpt-oss-120b** | 0.597 | 0.656 | 0.375 | 1.117 | 0.661 | 38.61% | 88.0% | 1479.77 ms |
+| **qwen/qwen3.8-27b** | 0.576 | 0.657 | 0.375 | 1.117 | 0.661 | 30.01% | 88.0% | 1049.37 ms |
 
 ### Architectural Trade-off Discussion:
 - **Code Llama 7B Instruct**: Highest overall correctness (92%) and architectural reasoning depth. Best for complex system design questions.
