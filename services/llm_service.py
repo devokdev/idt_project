@@ -91,11 +91,14 @@ class LLMService:
 
         messages.append({"role": "user", "content": prompt})
 
+        # Cap completion tokens for models with strict OTPM rate limits
+        actual_max_tokens = 768 if "qwen" in target_model.lower() else min(max_tokens, 1536)
+
         payload = {
             "model": target_model,
             "messages": messages,
             "temperature": max(0.0, min(1.0, temperature)),
-            "max_completion_tokens": max_tokens
+            "max_completion_tokens": actual_max_tokens
         }
 
         last_error = None

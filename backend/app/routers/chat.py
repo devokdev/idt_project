@@ -66,7 +66,9 @@ async def chat_endpoint(request: ChatRequest):
         used_rag=result["used_rag"],
         context=context_objects,
         guardrail_status=guard_check.get("domain_classification", "passed"),
-        confidence_score=hallucination_eval["groundedness_score"]
+        confidence_score=hallucination_eval["groundedness_score"],
+        is_fallback=result.get("is_fallback", False),
+        warning=result.get("warning") or (f"Fallback Engine: {result.get('answer_error')}" if result.get("is_fallback") else None)
     )
 
 @router.post("/compare-models", response_model=CompareModelsResponse)

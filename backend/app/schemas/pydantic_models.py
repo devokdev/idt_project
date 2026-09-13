@@ -27,6 +27,8 @@ class ChatResponse(BaseModel):
     context: List[ContextChunk] = []
     guardrail_status: str = "passed"
     confidence_score: Optional[float] = None
+    is_fallback: bool = False
+    warning: Optional[str] = None
 
 # Retrieval Schemas
 class RetrieveRequest(BaseModel):

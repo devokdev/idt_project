@@ -66,7 +66,8 @@ class RAGPipeline:
             "context": context_chunks,
             "prompt_eval_count": llm_result.get("prompt_eval_count", 0),
             "eval_count": llm_result.get("eval_count", 0),
-            "is_fallback": llm_result.get("is_fallback", False)
+            "is_fallback": llm_result.get("is_fallback", False),
+            "warning": llm_result.get("warning")
         }
 
     def compare_rag_vs_non_rag(self, question: str, model: Optional[str] = None) -> Dict[str, Any]:
