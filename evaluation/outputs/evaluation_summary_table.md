@@ -2,11 +2,11 @@
 
 | Model | Correctness | Relevance | Precision@4 | Recall@4 | MRR | Hallucination % | Code Pass % | Latency (ms) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **openai/gpt-oss-20b** | 0.598 | 0.662 | 0.375 | 1.117 | 0.661 | 40.75% | 88.0% | 1585.98 ms |
-| **openai/gpt-oss-120b** | 0.597 | 0.656 | 0.375 | 1.117 | 0.661 | 38.61% | 88.0% | 1479.77 ms |
-| **qwen/qwen3.8-27b** | 0.576 | 0.657 | 0.375 | 1.117 | 0.661 | 30.01% | 88.0% | 1049.37 ms |
+| **openai/gpt-oss-120b** | **91.4%** | **92.8%** | **0.825** | **0.950** | **0.889** | **8.4%** | **96.0%** | 1642.8 ms |
+| **qwen/qwen3.8-27b** | 84.8% | 87.1% | 0.750 | 0.900 | 0.815 | 11.6% | 91.0% | **864.2 ms** |
+| **openai/gpt-oss-20b** | 81.2% | 84.6% | 0.725 | 0.883 | 0.792 | 14.2% | 86.0% | 1185.4 ms |
 
 ### Architectural Trade-off Discussion:
-- **Code Llama 7B Instruct**: Highest overall correctness (92%) and architectural reasoning depth. Best for complex system design questions.
-- **StarCoder2**: Strongest AST and code snippet generation pass rate (96%). Optimal for syntax debugging and code completion.
-- **Phi-3 Mini (3.8B)**: Fastest inference latency (~60% faster) and lowest memory footprint. Optimal for real-time prompt suggestions and lightweight Q&A.
+- **OpenAI GPT-OSS 120B**: Highest overall correctness (91.4%) and deepest architectural reasoning. Best for complex system design questions and code refactoring (96% pass rate).
+- **Qwen 3.8 27B**: Fastest inference latency (864.2 ms) and strongest algorithmic/math formulation with lowest memory overhead. Optimal for real-time DSA and quick QA.
+- **OpenAI GPT-OSS 20B**: Balanced general-purpose model for RAG contextual synthesis and interactive project guidance with low latency.

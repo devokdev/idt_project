@@ -278,8 +278,8 @@
   {
     "id": 30,
     "category": "Routing",
-    "question": "How does the dynamic router choose between Phi-3 Mini, StarCoder2, and Code Llama?",
-    "ground_truth": "Routes simple QA to Phi-3, code syntax queries to StarCoder2, and complex architectural design to Code Llama.",
+    "question": "How does the dynamic router choose between GPT-OSS 20B, GPT-OSS 120B, and Qwen 3.8 27B?",
+    "ground_truth": "Routes general QA and RAG synthesis to GPT-OSS 20B, code syntax and complex architecture to GPT-OSS 120B, and algorithmic reasoning and math logic to Qwen 3.8 27B.",
     "expected_sources": [
       "kb2_rag_and_llm_architecture.md"
     ]
