@@ -110,6 +110,15 @@ class SuggestionResponse(BaseModel):
     query_prefix: str
     suggestions: List[str]
 
+class PerQuestionMetrics(BaseModel):
+    correctness: float = Field(0.0, description="Fact alignment score (0.0 to 1.0)")
+    relevance: float = Field(0.0, description="Semantic relevance to query & ground context (0.0 to 1.0)")
+    precision_at_k: float = Field(0.0, description="Precision@4 of retrieved context")
+    mrr: float = Field(0.0, description="Mean reciprocal rank of source")
+    hallucination_rate: float = Field(0.0, description="Hallucination percentage (0 to 100)")
+    code_pass_rate: float = Field(1.0, description="Code syntax pass rate (0.0 to 1.0)")
+    latency_ms: float = Field(0.0, description="Inference latency in milliseconds")
+
 # Multi-Model Comparison Schemas
 class CompareModelResult(BaseModel):
     model: str
@@ -119,6 +128,7 @@ class CompareModelResult(BaseModel):
     hallucination_rate: float
     token_count: int
     provider: str
+    metrics: Optional[PerQuestionMetrics] = None
 
 class CompareModelsRequest(BaseModel):
     prompt: str = Field(..., description="Student query or question")

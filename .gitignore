@@ -33,4 +33,7 @@ knowledge_base/vectordb_corrupt_migration/
 test_chroma/
 .DS_Store
 Thumbs.db
+.env
+.env.*
+viva_prep.md
 

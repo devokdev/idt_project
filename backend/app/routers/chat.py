@@ -2,7 +2,7 @@ import time
 from fastapi import APIRouter, HTTPException
 from backend.app.schemas.pydantic_models import (
     ChatRequest, ChatResponse, ContextChunk,
-    CompareModelsRequest, CompareModelsResponse, CompareModelResult
+    CompareModelsRequest, CompareModelsResponse, CompareModelResult, PerQuestionMetrics
 )
 from rag.rag_pipeline import rag_pipeline
 from services.retrieval_service import retrieval_service
@@ -10,8 +10,10 @@ from services.guardrails_service import guardrails_service
 from services.routing_service import routing_service
 from services.hallucination_service import hallucination_service
 from services.llm_service import llm_service
+from evaluation.metrics import EvaluationMetrics
 from rag.prompt_builder import PromptBuilder
 from backend.app.config import settings
+import re
 
 router = APIRouter(prefix="", tags=["Chat & Mentoring"])
 
@@ -118,6 +120,46 @@ async def compare_models_endpoint(request: CompareModelsRequest):
             context_chunks=context_chunks
         )
 
+        # Compute Per-Question IR & Quality Metrics
+        retrieved_sources = [c["source"] for c in context_chunks] if context_chunks else []
+        ground_text = " ".join([c["content"] for c in context_chunks]) if context_chunks else request.prompt
+        
+        # 1. Precision@4 & MRR (Dynamically identify expected document based on topic/domain)
+        q_lower = request.prompt.lower()
+        if any(w in q_lower for w in ["dsa", "algorithm", "sort", "tree", "network", "tcp", "http", "complexity"]):
+            expected_sources = ["kb5"]
+        elif any(w in q_lower for w in ["os", "process", "thread", "concurrency", "lock", "deadlock", "memory", "virtual memory"]):
+            expected_sources = ["kb3"]
+        elif any(w in q_lower for w in ["db", "dbms", "sql", "acid", "b+ tree", "lsm", "nosql", "cache", "transaction"]):
+            expected_sources = ["kb4"]
+        elif any(w in q_lower for w in ["rubric", "marks", "weight", "evaluation", "pass", "plagiarism", "viva", "thesis"]):
+            expected_sources = ["kb1"]
+        elif any(w in q_lower for w in ["rag", "llm", "chunk", "embedding", "vector", "groq", "lpu", "hnsw"]):
+            expected_sources = ["kb2"]
+        else:
+            expected_sources = ["kb1", "kb2", "kb3", "kb4", "kb5"]
+
+        p_k = EvaluationMetrics.precision_at_k(retrieved_sources, expected_sources, k=4) if retrieved_sources else 0.0
+        mrr = EvaluationMetrics.mean_reciprocal_rank(retrieved_sources, expected_sources) if retrieved_sources else 0.0
+        
+        # 2. Correctness & Relevance
+        correctness = EvaluationMetrics.compute_correctness(answer, ground_text)
+        relevance = EvaluationMetrics.compute_semantic_relevance(answer, request.prompt)
+        
+        # 3. Code Pass Rate (check any fenced python blocks)
+        code_blocks = re.findall(r'```(?:python)?\s*([\s\S]*?)```', answer)
+        code_pass = EvaluationMetrics.compute_code_pass_rate(code_blocks) if code_blocks else 1.0
+
+        pq_metrics = PerQuestionMetrics(
+            correctness=round(correctness, 3),
+            relevance=round(relevance, 3),
+            precision_at_k=round(p_k, 3),
+            mrr=round(mrr, 3),
+            hallucination_rate=round(h_eval.get("hallucination_rate", 0.0), 1),
+            code_pass_rate=round(code_pass, 3),
+            latency_ms=round(latency, 1)
+        )
+
         results.append(CompareModelResult(
             model=model_name,
             answer=answer,
@@ -125,7 +167,8 @@ async def compare_models_endpoint(request: CompareModelsRequest):
             grounding_score=h_eval.get("groundedness_score", 1.0),
             hallucination_rate=h_eval.get("hallucination_rate", 0.0),
             token_count=gen.get("eval_count", len(answer.split())),
-            provider=provider
+            provider=provider,
+            metrics=pq_metrics
         ))
 
     context_objects = [
